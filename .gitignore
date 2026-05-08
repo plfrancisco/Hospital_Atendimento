@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv
+venv/
+ENV/
+
+# Banco de Dados
+*.db
+*.sqlite3
+
+# Streamlit
+.streamlit/
+static/
+
+# IDEs e OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Gemini e Workspace Local (Não subir)
+.skills/
+Mapa_de_Arquivos.md
+Sistema_Hospital_V2_Master.md
+Guia_de_Estudo_Hospitalar.md
+test_funcional.py
+Services/popular_dados.py
