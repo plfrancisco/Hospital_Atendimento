@@ -20,11 +20,19 @@ Sistema de gestão de fluxo de pacientes desenvolvido em Python com **Streamlit*
 
 ## 📊 Modelo Entidade-Relacionamento (MER)
 
-O banco de dados foi modelado para garantir um fluxo contínuo e rastreável. Abaixo está a representação visual das tabelas:
+O banco de dados foi modelado para garantir um fluxo contínuo e rastreável, abrangendo desde a recepção até a internação e o diário clínico.
 
 ```mermaid
 erDiagram
     PACIENTE ||--o{ ATENDIMENTO : "possui"
+    PACIENTE ||--o{ CONSULTA : "agenda"
+    MEDICO ||--o{ CONSULTA : "realiza"
+    PACIENTE ||--o{ INTERNACAO : "recebe"
+    LEITO ||--o{ INTERNACAO : "aloca"
+    ENFERMEIRA ||--o{ ATENDIMENTO : "realiza triagem"
+    ENFERMEIRA ||--o{ DIARIO_ENFERMAGEM : "registra"
+    INTERNACAO ||--o{ DIARIO_ENFERMAGEM : "possui"
+    USUARIO ||--o{ ATENDIMENTO : "monitora"
 
     PACIENTE {
         int id PK
@@ -36,10 +44,67 @@ erDiagram
     ATENDIMENTO {
         int id PK
         int paciente_id FK
+        int medico_id FK
+        int enfermeira_id FK
         string status
         datetime data_chegada
         datetime data_triagem
         datetime data_atendimento
+        text sintomas
+        text sinais_vitais
+    }
+
+    MEDICO {
+        int id PK
+        string nome
+        string crm UK
+        string especialidade
+    }
+
+    ENFERMEIRA {
+        int id PK
+        string nome
+        string coren UK
+    }
+
+    CONSULTA {
+        int id PK
+        int paciente_id FK
+        int medico_id FK
+        datetime data_hora
+        string status
+        text observacoes
+    }
+
+    LEITO {
+        int id PK
+        string numero UK
+        string tipo
+        string status
+    }
+
+    INTERNACAO {
+        int id PK
+        int paciente_id FK
+        int leito_id FK
+        datetime data_entrada
+        datetime data_saida
+        text motivo
+    }
+
+    DIARIO_ENFERMAGEM {
+        int id PK
+        int internacao_id FK
+        int enfermeira_id FK
+        text observacao
+        datetime data_registro
+    }
+
+    USUARIO {
+        int id PK
+        string login UK
+        string senha
+        string nivel_acesso
     }
 ```
 

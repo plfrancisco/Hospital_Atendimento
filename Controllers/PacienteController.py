@@ -24,15 +24,24 @@ def consultarPacientes():
     cursor = conexao.cursor()
     dados = []
     try:
-        cursor.execute("SELECT * FROM paciente")
+        # Busca dados do paciente e sua data de chegada (primeiro atendimento registrado)
+        query = """
+            SELECT p.id, p.nome, p.cpf, p.prioridade, a.data_chegada
+            FROM paciente p
+            LEFT JOIN atendimento a ON p.id = a.paciente_id
+            GROUP BY p.id
+            ORDER BY a.data_chegada DESC
+        """
+        cursor.execute(query)
         rows = cursor.fetchall()
         for row in rows:
-            id_p, nome, cpf, prioridade = row
+            id_p, nome, cpf, prioridade, data_chegada = row
             dados.append({
                 "ID": id_p,
                 "Nome": nome,
                 "CPF": cpf,
-                "Prioridade": prioridade
+                "Prioridade": prioridade,
+                "Chegada": data_chegada if data_chegada else "Não registrada"
             })
     except sqlite3.Error as e:
         print(f"Erro ao consultar pacientes: {e}")
@@ -67,6 +76,26 @@ def excluirPaciente(id_paciente):
         return True
     except sqlite3.Error as e:
         print(f"Erro ao excluir paciente: {e}")
+        return False
+    finally:
+        conexao.close()
+
+def atualizarPaciente(paciente):
+    """
+    Atualiza os dados de um paciente existente no banco de dados.
+    """
+    conexao = conectaBD()
+    cursor = conexao.cursor()
+    try:
+        cursor.execute("""
+            UPDATE paciente 
+            SET nome = ?, cpf = ?, prioridade = ?
+            WHERE id = ?
+        """, (paciente.get_nome(), paciente.get_cpf(), paciente.get_prioridade(), paciente.get_id()))
+        conexao.commit()
+        return True
+    except sqlite3.Error as e:
+        print(f"Erro ao atualizar paciente: {e}")
         return False
     finally:
         conexao.close()

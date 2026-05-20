@@ -1,6 +1,20 @@
 from Services.database import conectaBD
 
+"""
+Módulo de Gerenciamento da Tabela de Pacientes.
+Este serviço lida com a infraestrutura da tabela 'paciente' no banco de dados.
+"""
+
 def criar_tabela():
+    """
+    Cria a tabela 'paciente' caso ela ainda não exista.
+
+    A tabela armazena os dados básicos e a classificação de risco (prioridade):
+    - id: Identificador único.
+    - nome: Nome completo do paciente.
+    - cpf: CPF (único).
+    - prioridade: Classificação (ex: Verde, Amarelo, Vermelho).
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
 
@@ -20,3 +34,4 @@ def criar_tabela():
 
 if __name__ == "__main__":
     criar_tabela()
+
