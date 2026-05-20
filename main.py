@@ -1,4 +1,8 @@
-# ARQUIVO PRINCIPAL (main.py)
+# =================================================================
+# NÚCLEO HOSPITALAR: Arquivo Principal (main.py)
+# Responsabilidade: Orquestração Global, Roteamento e Sessão
+# =================================================================
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 import Views.PageRecepcao as PageRecepcao
@@ -9,17 +13,18 @@ import Views.PageDashboard as PageDashboard
 import Views.PageLogin as PageLogin
 import Services.database_engine as db_engine
 
-# Inicializa o banco de dados e as tabelas
+# --- BLOCO: INICIALIZAÇÃO DO SISTEMA ---
+# Garante que o banco de dados e as tabelas existam antes de rodar a UI
 db_engine.inicializar_sistema()
 
-# Configura o título da aba do navegador e o layout da página
+# Configuração da Página Streamlit
 st.set_page_config(page_title="Sistema de Gestão Hospitalar", layout="wide")
 
-# --- CONTROLE DE SESSÃO E LOGIN ---
+# --- BLOCO: CONTROLE DE SESSÃO E LOGIN ---
 if 'autenticado' not in st.session_state:
     st.session_state['autenticado'] = False
 
-# --- GLOBAL CORPORATE UI ---
+# --- BLOCO: GLOBAL CORPORATE UI (CSS) ---
 st.markdown("""
     <style>
     .main { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
@@ -34,11 +39,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Verificação de Autenticação
 if not st.session_state['autenticado']:
     PageLogin.exibir_pagina()
     st.stop()
 
-# --- SIDEBAR CORPORATIVA ---
+# --- BLOCO: SIDEBAR CORPORATIVA (Navegação) ---
 with st.sidebar:
     st.markdown("<h2 style='color: #0f172a; margin-bottom: 20px;'>NÚCLEO HOSPITALAR</h2>", unsafe_allow_html=True)
     modulo = option_menu(
@@ -55,7 +61,7 @@ with st.sidebar:
         }
     )
     
-    # Empurrar o botão de logout para o final da sidebar
+    # Rodapé da Sidebar com Botão de Logout
     st.markdown("<div style='height: 40vh;'></div>", unsafe_allow_html=True)
     
     if st.button("ENCERRAR SESSÃO", type="primary", use_container_width=True, key="btn_logout_hospital"):
@@ -70,7 +76,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-# ROTEAMENTO
+# --- BLOCO: ROTEAMENTO DE MÓDULOS ---
 if modulo == "Recepção":
     PageRecepcao.exibir_pagina()
 elif modulo == "Triagem":

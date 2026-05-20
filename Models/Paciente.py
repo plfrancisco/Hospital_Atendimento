@@ -1,14 +1,23 @@
+# =================================================================
+# MODELO: Paciente
+# Responsabilidade: Representa a entidade Paciente no sistema hospitalar.
+# =================================================================
+
 class Paciente:
     """
     Representa a entidade Paciente no sistema hospitalar.
-    Armazena dados básicos de identificação e classificação.
+    Armazena dados básicos de identificação e classificação de prioridade.
     """
     def __init__(self, id, nome, cpf, prioridade):
-        # Atributos protegidos (uso do prefixo _) para incentivar o uso de getters e setters
+        """Inicializa os atributos do paciente."""
+        # --- BLOCO: ATRIBUTOS PROTEGIDOS ---
+        # Uso do prefixo _ para incentivar o uso de getters e setters
         self._id = id
         self._nome = nome
         self._cpf = cpf
         self._prioridade = prioridade
+
+    # --- BLOCO: MÉTODOS DE ACESSO (GETTERS/SETTERS) ---
 
     def get_id(self):
         """Retorna o ID único do paciente."""

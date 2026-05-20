@@ -1,18 +1,19 @@
-import sqlite3
+# =================================================================
+# SERVIÇO: Conector Database
+# Responsabilidade: Gerenciar a conexão física com o SQLite
+# =================================================================
 
-"""
-Módulo de Conexão com o Banco de Dados.
-Este serviço é responsável por estabelecer a comunicação com o banco de dados SQLite.
-"""
+import sqlite3
 
 def conectaBD():
     """
-    Estabelece uma conexão com o banco de dados local 'Hospital.db'.
-    
-    Retorna:
-        sqlite3.Connection: Objeto de conexão com o banco de dados.
+    Estabelece a conexão com o banco de dados 'Hospital.db'.
+    Configura o row_factory para permitir acesso aos dados por nome da coluna.
     """
-    # Cria a conexão com o banco de dados Hospital.db
-    # O arquivo será criado automaticamente se não existir
-    conexao = sqlite3.connect("Hospital.db")
-    return conexao
+    try:
+        conexao = sqlite3.connect("Hospital.db")
+        conexao.row_factory = sqlite3.Row
+        return conexao
+    except sqlite3.Error as e:
+        print(f"--- [DATABASE ERROR] Falha na conexão: {e} ---")
+        return None
