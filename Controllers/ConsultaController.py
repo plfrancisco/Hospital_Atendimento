@@ -1,7 +1,17 @@
+# =================================================================
+# CONTROLLER: ConsultaController
+# Responsabilidade: Gerenciar o agendamento e histórico de consultas médicas.
+# =================================================================
+
 import sqlite3
 from Services.database import conectaBD
 
 def agendarConsulta(consulta):
+    """
+    --- BLOCO 1: AGENDAMENTO (CREATE) ---
+    Persiste um novo registro de consulta no banco de dados.
+    Vincula um Paciente a um Médico em uma data e hora específica.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     consulta_id = None
@@ -19,6 +29,11 @@ def agendarConsulta(consulta):
     return consulta_id
 
 def consultarConsultas():
+    """
+    --- BLOCO 2: VISUALIZAÇÃO DE AGENDA (READ) ---
+    Recupera todas as consultas agendadas, trazendo os nomes do paciente 
+    e do médico através de JOINs para facilitar a leitura na View.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
@@ -47,6 +62,11 @@ def consultarConsultas():
     return dados
 
 def atualizarConsulta(consulta):
+    """
+    --- BLOCO 3: REAGENDAMENTO / ATUALIZAÇÃO (UPDATE) ---
+    Permite alterar o horário, o status (ex: Realizada, Cancelada) 
+    ou adicionar observações clínicas à consulta.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
@@ -64,6 +84,10 @@ def atualizarConsulta(consulta):
         conexao.close()
 
 def cancelarConsulta(id_consulta):
+    """
+    --- BLOCO 4: CANCELAMENTO (DELETE) ---
+    Remove definitivamente o registro da consulta do banco de dados.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:

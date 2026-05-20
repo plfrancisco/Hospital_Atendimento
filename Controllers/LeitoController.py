@@ -1,8 +1,18 @@
+# =================================================================
+# CONTROLLER: LeitoController
+# Responsabilidade: Gerenciar a infraestrutura física (Leitos) do hospital.
+# =================================================================
+
 import sqlite3
 from Services.database import conectaBD
 from Models.Leito import Leito
 
 def incluirLeito(leito):
+    """
+    --- BLOCO 1: CADASTRO DE INFRAESTRUTURA (CREATE) ---
+    Adiciona um novo leito ao inventário hospitalar.
+    Define o número da acomodação, o tipo (Enfermaria, UTI, etc) e o status inicial.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     leito_id = None
@@ -20,6 +30,11 @@ def incluirLeito(leito):
     return leito_id
 
 def consultarLeitos():
+    """
+    --- BLOCO 2: MONITORAMENTO DE DISPONIBILIDADE (READ) ---
+    Retorna a lista de todos os leitos e seus respectivos estados atuais 
+    (Livre, Ocupado, Manutenção).
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
@@ -40,6 +55,10 @@ def consultarLeitos():
     return dados
 
 def atualizarLeito(leito):
+    """
+    --- BLOCO 3: MANUTENÇÃO DE DADOS (UPDATE) ---
+    Permite alterar as características ou o status de um leito específico.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
@@ -57,6 +76,10 @@ def atualizarLeito(leito):
         conexao.close()
 
 def excluirLeito(id_leito):
+    """
+    --- BLOCO 4: REMOÇÃO DE INFRAESTRUTURA (DELETE) ---
+    Exclui o registro de um leito do sistema.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:

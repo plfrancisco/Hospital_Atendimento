@@ -10,20 +10,22 @@ from Services.database import conectaBD
 
 def registrarChegada(paciente_id):
     """
-    Cria um novo registro na tabela 'atendimento' assim que o paciente é cadastrado.
-    Define o status inicial como 'Aguardando Triagem' e salva o momento exato da chegada.
+    --- BLOCO 1: REGISTRO DE CHEGADA ---
+    Cria um novo registro na tabela 'atendimento' assim que o paciente é cadastrado na recepção.
+    Define o status inicial como 'Aguardando Triagem' e salva o timestamp exato da entrada.
     """
-    # --- BLOCO: CONEXÃO COM O BANCO ---
     conexao = conectaBD()
     cursor = conexao.cursor()
     
     try:
-        # --- BLOCO: REGISTRO DE DADOS ---
+        # Captura a data e hora atual no formato padrão SQL
         data_chegada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         cursor.execute("""
             INSERT INTO atendimento (paciente_id, status, data_chegada)
             VALUES (?, ?, ?)
         """, (paciente_id, "Aguardando Triagem", data_chegada))
+        
         conexao.commit()
     except sqlite3.Error as e:
         print(f"Erro ao registrar chegada: {e}")
@@ -32,24 +34,22 @@ def registrarChegada(paciente_id):
 
 def obterProximaEnfermeiraRodizio():
     """
-    Busca a lista de enfermeiras e identifica quem foi a última a realizar triagem.
-    Retorna o ID da próxima enfermeira na sequência.
+    --- BLOCO 2: LÓGICA DE RODÍZIO (SMART ASSIGNMENT) ---
+    Garante uma distribuição justa de trabalho buscando a lista de enfermeiras 
+    e identificando quem foi a última a realizar uma triagem para selecionar a próxima.
     """
-    # --- BLOCO: INICIALIZAÇÃO ---
     conexao = conectaBD()
     cursor = conexao.cursor()
     
     try:
-        # --- BLOCO: BUSCA DE ENFERMEIRAS ---
-        # 1. Obter todas as enfermeiras ordenadas por ID
+        # Passo A: Obter todas as enfermeiras disponíveis ordenadas
         cursor.execute("SELECT id FROM enfermeira ORDER BY id ASC")
         enfermeiras = [row[0] for row in cursor.fetchall()]
         
         if not enfermeiras:
             return None
             
-        # --- BLOCO: VERIFICAÇÃO DE ÚLTIMA TRIAGEM ---
-        # 2. Obter o ID da última enfermeira que realizou uma triagem
+        # Passo B: Localizar quem fez a triagem mais recente no sistema
         cursor.execute("""
             SELECT enfermeira_id FROM atendimento 
             WHERE enfermeira_id IS NOT NULL 
@@ -58,18 +58,17 @@ def obterProximaEnfermeiraRodizio():
         last_row = cursor.fetchone()
         
         if not last_row:
-            return enfermeiras[0] # Se ninguém fez triagem ainda, pega a primeira
+            return enfermeiras[0] # Se for o primeiro atendimento do dia, pega a primeira da lista
             
         last_id = last_row[0]
         
-        # --- BLOCO: LÓGICA DE RODÍZIO ---
-        # 3. Lógica de Rodízio: encontrar o próximo ID
+        # Passo C: Calcular o próximo índice da lista (Circular Buffer Logic)
         try:
             current_index = enfermeiras.index(last_id)
             next_index = (current_index + 1) % len(enfermeiras)
             return enfermeiras[next_index]
         except ValueError:
-            # Caso a enfermeira que fez a última triagem tenha sido deletada
+            # Caso a enfermeira que fez a última triagem não esteja mais no sistema
             return enfermeiras[0]
             
     except sqlite3.Error as e:
@@ -80,21 +79,22 @@ def obterProximaEnfermeiraRodizio():
 
 def finalizarTriagem(atendimento_id, enfermeira_id, sintomas, sinais_vitais, medico_id):
     """
-    Atualiza um atendimento existente. Muda o status para 'Aguardando Atendimento',
-    vincula a enfermeira responsável, o médico selecionado e registra os dados clínicos.
+    --- BLOCO 3: CONCLUSÃO DA TRIAGEM ---
+    Atualiza o registro de atendimento com os dados coletados pela enfermagem.
+    Muda o status para 'Aguardando Atendimento' e encaminha para o médico selecionado.
     """
-    # --- BLOCO: CONEXÃO E ATUALIZAÇÃO ---
     conexao = conectaBD()
     cursor = conexao.cursor()
     
     try:
-        # --- BLOCO: PERSISTÊNCIA DE DADOS ---
         data_triagem = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         cursor.execute("""
             UPDATE atendimento 
             SET status = ?, data_triagem = ?, enfermeira_id = ?, sintomas = ?, sinais_vitais = ?, medico_id = ?
             WHERE id = ?
         """, ("Aguardando Atendimento", data_triagem, enfermeira_id, sintomas, sinais_vitais, medico_id, atendimento_id))
+        
         conexao.commit()
     except sqlite3.Error as e:
         print(f"Erro ao finalizar triagem: {e}")
@@ -103,21 +103,22 @@ def finalizarTriagem(atendimento_id, enfermeira_id, sintomas, sinais_vitais, med
 
 def finalizarAtendimento(atendimento_id, medico_id):
     """
-    Conclui a jornada do paciente no sistema. O status passa para 'Atendido',
-    vincula o médico responsável e o horário da consulta é salvo.
+    --- BLOCO 4: CONCLUSÃO MÉDICA ---
+    Encerra a jornada do paciente na unidade de atendimento imediato. 
+    O status passa para 'Atendido', selando o registro clínico.
     """
-    # --- BLOCO: CONEXÃO ---
     conexao = conectaBD()
     cursor = conexao.cursor()
     
     try:
-        # --- BLOCO: ATUALIZAÇÃO DE STATUS ---
         data_atendimento = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
         cursor.execute("""
             UPDATE atendimento 
             SET status = ?, data_atendimento = ?, medico_id = ?
             WHERE id = ?
         """, ("Atendido", data_atendimento, medico_id, atendimento_id))
+        
         conexao.commit()
     except sqlite3.Error as e:
         print(f"Erro ao finalizar atendimento: {e}")
@@ -126,16 +127,16 @@ def finalizarAtendimento(atendimento_id, medico_id):
 
 def consultarFila(status_filtro=None):
     """
-    Recupera os dados de atendimento do banco, unindo (JOIN) com as informações do paciente,
-    enfermeira e médico.
+    --- BLOCO 5: CONSULTA DA FILA (READ MULTI-TABLE) ---
+    Recupera os dados de atendimento unindo (JOIN) informações de múltiplas tabelas
+    para apresentar uma visão completa (Paciente, Médico e Enfermeira).
     """
-    # --- BLOCO: PREPARAÇÃO ---
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
     
     try:
-        # --- BLOCO: QUERY SQL ---
+        # Query unificada que traz nomes em vez de apenas IDs (Foreign Keys)
         query = """
             SELECT a.id, p.nome, p.prioridade, a.status, a.data_chegada, a.data_triagem, a.data_atendimento, 
                    m.nome, e.nome, a.sintomas, a.sinais_vitais
@@ -145,7 +146,6 @@ def consultarFila(status_filtro=None):
             LEFT JOIN enfermeira e ON a.enfermeira_id = e.id
         """
         
-        # --- BLOCO: EXECUÇÃO E FILTRAGEM ---
         if status_filtro:
             query += " WHERE a.status = ?"
             cursor.execute(query, (status_filtro,))
@@ -154,7 +154,7 @@ def consultarFila(status_filtro=None):
             
         rows = cursor.fetchall()
         
-        # --- BLOCO: ESTRUTURAÇÃO DOS RESULTADOS ---
+        # Converte o resultado bruto do banco em uma lista de dicionários (Fácil uso no Streamlit)
         for row in rows:
             dados.append({
                 "ID": row[0],

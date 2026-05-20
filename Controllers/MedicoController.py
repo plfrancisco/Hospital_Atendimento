@@ -1,8 +1,18 @@
+# =================================================================
+# CONTROLLER: MedicoController
+# Responsabilidade: Gerenciar o cadastro e o corpo clínico médico.
+# =================================================================
+
 import sqlite3
 from Services.database import conectaBD
 from Models.Medico import Medico
 
 def incluirMedico(medico):
+    """
+    --- BLOCO 1: REGISTRO DE MÉDICO (CREATE) ---
+    Salva os dados de um novo médico no sistema.
+    O CRM atua como a chave de registro profissional obrigatória.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     medico_id = None
@@ -20,6 +30,10 @@ def incluirMedico(medico):
     return medico_id
 
 def consultarMedicos():
+    """
+    --- BLOCO 2: LISTAGEM DO CORPO CLÍNICO (READ) ---
+    Retorna todos os médicos cadastrados e suas especialidades.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
@@ -40,6 +54,10 @@ def consultarMedicos():
     return dados
 
 def atualizarMedico(medico):
+    """
+    --- BLOCO 3: ATUALIZAÇÃO DE REGISTRO (UPDATE) ---
+    Permite corrigir dados cadastrais ou alterar a especialidade do médico.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
@@ -57,6 +75,10 @@ def atualizarMedico(medico):
         conexao.close()
 
 def excluirMedico(id_medico):
+    """
+    --- BLOCO 4: REMOÇÃO DE REGISTRO (DELETE) ---
+    Exclui o médico do banco de dados (Geralmente usado em desligamentos).
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:

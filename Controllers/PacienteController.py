@@ -1,8 +1,18 @@
+# =================================================================
+# CONTROLLER: PacienteController
+# Responsabilidade: Lógica de Negócio e Persistência da entidade Paciente.
+# =================================================================
+
 import sqlite3
 from Services.database import conectaBD
 from Models.Paciente import Paciente
 
 def incluirPaciente(paciente):
+    """
+    --- BLOCO 1: INSERÇÃO (CREATE) ---
+    Recebe um objeto Paciente e persiste seus dados no SQLite.
+    Retorna o ID gerado pelo banco para ser usado em outras tabelas.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     paciente_id = None
@@ -12,7 +22,7 @@ def incluirPaciente(paciente):
             VALUES (?, ?, ?)
         """, (paciente.get_nome(), paciente.get_cpf(), paciente.get_prioridade()))
         conexao.commit()
-        paciente_id = cursor.lastrowid
+        paciente_id = cursor.lastrowid # Captura o ID auto-incremental gerado
     except sqlite3.Error as e:
         print(f"Erro ao inserir paciente: {e}")
     finally:
@@ -20,6 +30,11 @@ def incluirPaciente(paciente):
     return paciente_id
 
 def consultarPacientes():
+    """
+    --- BLOCO 2: CONSULTA GERAL (READ) ---
+    Retorna uma lista de dicionários com todos os pacientes.
+    Utiliza um LEFT JOIN com a tabela de atendimento para mostrar a última chegada.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
@@ -50,21 +65,32 @@ def consultarPacientes():
     return dados
 
 def buscarPacientePorCPF(cpf):
+    """
+    --- BLOCO 3: BUSCA ESPECÍFICA ---
+    Localiza um paciente pelo CPF para evitar cadastros duplicados
+    ou para resgatar dados na recepção.
+    """
     conexao = conectaBD()
-    cursor = conectaBD().cursor() # Usando conectaBD direto para garantir nova conexão
+    cursor = conexao.cursor()
     paciente = None
     try:
         cursor.execute("SELECT * FROM paciente WHERE cpf = ?", (cpf,))
         row = cursor.fetchone()
         if row:
+            # Reconstrói o objeto Paciente (Model) a partir dos dados do banco
             paciente = Paciente(row[0], row[1], row[2], row[3])
     except sqlite3.Error as e:
         print(f"Erro ao buscar paciente: {e}")
     finally:
-        cursor.close()
+        conexao.close()
     return paciente
 
 def excluirPaciente(id_paciente):
+    """
+    --- BLOCO 4: EXCLUSÃO (DELETE) ---
+    Remove o paciente do banco. Por segurança e integridade, 
+    remove primeiro seus atendimentos vinculados.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
@@ -82,6 +108,7 @@ def excluirPaciente(id_paciente):
 
 def atualizarPaciente(paciente):
     """
+    --- BLOCO 5: ATUALIZAÇÃO (UPDATE) ---
     Atualiza os dados de um paciente existente no banco de dados.
     """
     conexao = conectaBD()

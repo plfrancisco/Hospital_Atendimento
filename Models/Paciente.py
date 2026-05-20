@@ -9,44 +9,48 @@ class Paciente:
     Armazena dados básicos de identificação e classificação de prioridade.
     """
     def __init__(self, id, nome, cpf, prioridade):
-        """Inicializa os atributos do paciente."""
-        # --- BLOCO: ATRIBUTOS PROTEGIDOS ---
-        # Uso do prefixo _ para incentivar o uso de getters e setters
+        """
+        --- BLOCO 1: CONSTRUTOR ---
+        Inicializa os atributos do paciente no momento da criação do objeto.
+        """
+        # Uso do prefixo _ para incentivar o uso de getters e setters (Encapsulamento)
         self._id = id
         self._nome = nome
         self._cpf = cpf
         self._prioridade = prioridade
 
-    # --- BLOCO: MÉTODOS DE ACESSO (GETTERS/SETTERS) ---
+    # --- BLOCO 2: MÉTODOS DE ACESSO (ENCAPSULAMENTO) ---
+    # Estes métodos (getters e setters) permitem que o resto do sistema
+    # interaja com os dados de forma controlada e segura.
 
     def get_id(self):
-        """Retorna o ID único do paciente."""
+        """Retorna o identificador único gerado pelo Banco de Dados."""
         return self._id
 
     def set_id(self, id):
-        """Define ou atualiza o ID do paciente."""
+        """Atualiza o ID (geralmente usado durante a persistência)."""
         self._id = id
 
     def get_nome(self):
-        """Retorna o nome completo do paciente."""
+        """Retorna o nome completo do cidadão/paciente."""
         return self._nome
 
     def set_nome(self, nome):
-        """Define ou atualiza o nome do paciente."""
+        """Permite corrigir ou atualizar o nome do paciente."""
         self._nome = nome
 
     def get_cpf(self):
-        """Retorna o CPF do paciente."""
+        """Retorna o CPF (identificador fiscal/social único)."""
         return self._cpf
 
     def set_cpf(self, cpf):
-        """Define ou atualiza o CPF do paciente."""
+        """Define o CPF do paciente."""
         self._cpf = cpf
 
     def get_prioridade(self):
-        """Retorna o nível de prioridade (ex: Normal, Preferencial)."""
+        """Retorna o nível de prioridade (ex: Normal, Preferencial, Emergência)."""
         return self._prioridade
 
     def set_prioridade(self, prioridade):
-        """Define ou atualiza a prioridade do paciente."""
+        """Atualiza o status de prioridade conforme a triagem."""
         self._prioridade = prioridade

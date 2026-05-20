@@ -1,3 +1,8 @@
+# =================================================================
+# VIEW: PageRecepcao
+# Responsabilidade: Interface de entrada para pacientes e gestão de corpo clínico.
+# =================================================================
+
 import streamlit as st
 import pandas as pd
 from Models.Paciente import Paciente
@@ -10,6 +15,10 @@ import Controllers.AtendimentoController as AtendimentoController
 import re
 
 def exibir_pagina():
+    """
+    --- BLOCO 1: ESTRUTURA DE ABAS ---
+    Organiza a página em três setores lógicos: Cadastro, Corpo Clínico e Administração.
+    """
     st.markdown("<h1 style='color: #0f172a;'>Recepção de Pacientes</h1>", unsafe_allow_html=True)
     
     tab_pacientes, tab_medicos, tab_admin = st.tabs([
@@ -28,6 +37,11 @@ def exibir_pagina():
         render_gestao_administrativa()
 
 def render_cadastro_paciente():
+    """
+    --- BLOCO 2: FLUXO DE ENTRADA (CADASTRO + ATENDIMENTO) ---
+    Ao cadastrar um paciente, o sistema automaticamente registra sua 
+    chegada na fila de atendimento (tabela atendimento).
+    """
     st.markdown("<h3 style='color: #334155; margin-bottom: 20px;'>Entrada de Pacientes</h3>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.2])
     
@@ -42,8 +56,10 @@ def render_cadastro_paciente():
                 if st.form_submit_button("CADASTRAR E INICIAR FLUXO", use_container_width=True):
                     cpf_limpo = re.sub(r'\D', '', cpf)
                     if nome and len(cpf_limpo) == 11:
+                        # Passo A: Cria o objeto Paciente e salva no Banco
                         p_id = PacienteController.incluirPaciente(Paciente(None, nome, cpf_limpo, prioridade))
                         if p_id:
+                            # Passo B: Registra a entrada na fila hospitalar (tabela Atendimento)
                             AtendimentoController.registrarChegada(p_id)
                             st.toast("Paciente cadastrado", icon="✅")
                             st.rerun()
@@ -51,6 +67,7 @@ def render_cadastro_paciente():
                     else: st.warning("Dados inválidos fornecidos.")
 
     with col2:
+        # Exibe os últimos 10 pacientes admitidos para visualização rápida
         st.markdown("<p style='font-weight: 600; color: #475569;'>Admissões Recentes</p>", unsafe_allow_html=True)
         dados = PacienteController.consultarPacientes()
         if dados:
@@ -60,6 +77,10 @@ def render_cadastro_paciente():
             st.info("Nenhum registro encontrado.")
 
 def render_cadastro_medico():
+    """
+    --- BLOCO 3: CADASTRO DE MÉDICOS ---
+    Interface simples para registrar profissionais no corpo clínico.
+    """
     st.markdown("<h3 style='color: #334155; margin-bottom: 20px;'>Registro de Médicos</h3>", unsafe_allow_html=True)
     col1, col2 = st.columns([1, 1.2])
     
@@ -87,11 +108,17 @@ def render_cadastro_medico():
             st.info("Nenhum profissional registrado.")
 
 def render_gestao_administrativa():
+    """
+    --- BLOCO 4: CONSOLE ADMINISTRATIVO (CRUD COMPLETO) ---
+    Permite busca, edição e exclusão de Pacientes, Médicos e Enfermagem.
+    Aqui é onde a manutenção dos dados ocorre.
+    """
     st.markdown("<h3 style='color: #334155; margin-bottom: 20px;'>Console Administrativo</h3>", unsafe_allow_html=True)
     
     col_p, col_m, col_e = st.columns(3)
     
     with col_p:
+        # Sub-bloco: Manutenção de Pacientes
         st.markdown("<p style='font-weight: 600; color: #1e293b;'>Gestão de Pacientes</p>", unsafe_allow_html=True)
         with st.container(border=True):
             cpf_busca = st.text_input("Buscar por CPF:", max_chars=11, key="admin_p_cpf")
@@ -122,6 +149,7 @@ def render_gestao_administrativa():
                             st.rerun()
 
     with col_m:
+        # Sub-bloco: Manutenção de Médicos
         st.markdown("<p style='font-weight: 600; color: #1e293b;'>Gestão de Médicos</p>", unsafe_allow_html=True)
         with st.container(border=True):
             medicos = MedicoController.consultarMedicos()
@@ -148,6 +176,7 @@ def render_gestao_administrativa():
             else: st.info("Sem registros médicos.")
 
     with col_e:
+        # Sub-bloco: Manutenção de Equipe de Enfermagem
         st.markdown("<p style='font-weight: 600; color: #1e293b;'>Gestão de Enfermagem</p>", unsafe_allow_html=True)
         with st.container(border=True):
             with st.form("form_enf_cad", clear_on_submit=True):

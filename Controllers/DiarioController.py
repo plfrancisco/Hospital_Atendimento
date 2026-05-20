@@ -1,8 +1,18 @@
+# =================================================================
+# CONTROLLER: DiarioController
+# Responsabilidade: Gerenciar os registros de evolução dos pacientes internados.
+# =================================================================
+
 import sqlite3
 from datetime import datetime
 from Services.database import conectaBD
 
 def registrarObservacao(internacao_id, enfermeira_id, observacao):
+    """
+    --- BLOCO 1: REGISTRO DE EVOLUÇÃO (CREATE) ---
+    Salva uma nova nota no diário de enfermagem vinculada a uma internação ativa.
+    Registra automaticamente o timestamp do momento da observação.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
@@ -20,6 +30,11 @@ def registrarObservacao(internacao_id, enfermeira_id, observacao):
         conexao.close()
 
 def consultarDiario(internacao_id):
+    """
+    --- BLOCO 2: HISTÓRICO DE EVOLUÇÃO (READ) ---
+    Recupera todas as notas de enfermagem de um paciente específico (via internacao_id).
+    Ordena do registro mais recente para o mais antigo para facilitar a leitura clínica.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []

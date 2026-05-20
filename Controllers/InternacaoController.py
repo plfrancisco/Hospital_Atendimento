@@ -1,18 +1,29 @@
+# =================================================================
+# CONTROLLER: InternacaoController
+# Responsabilidade: Gerenciar a ocupação de leitos e altas hospitalares.
+# =================================================================
+
 import sqlite3
 from Services.database import conectaBD
 from datetime import datetime
 
 def registrarInternacao(internacao):
+    """
+    --- BLOCO 1: ADMISSÃO HOSPITALAR (CREATE + UPDATE) ---
+    Cria um registro de internação e, simultaneamente, atualiza o status 
+    do leito para 'Ocupado' (Atomicidade).
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     internacao_id = None
     try:
+        # Passo A: Cria a ficha de internação
         cursor.execute("""
             INSERT INTO internacao (paciente_id, leito_id, data_entrada, motivo)
             VALUES (?, ?, ?, ?)
         """, (internacao.get_paciente_id(), internacao.get_leito_id(), internacao.get_data_entrada(), internacao.get_motivo()))
         
-        # Atualiza status do leito para 'Ocupado'
+        # Passo B: Bloqueia o leito para novos pacientes
         cursor.execute("UPDATE leito SET status = 'Ocupado' WHERE id = ?", (internacao.get_leito_id(),))
         
         conexao.commit()
@@ -24,6 +35,11 @@ def registrarInternacao(internacao):
     return internacao_id
 
 def consultarInternacoes():
+    """
+    --- BLOCO 2: MAPA DE INTERNAÇÃO (READ) ---
+    Lista todos os pacientes atualmente ou previamente internados, 
+    detalhando o leito e o motivo da permanência.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
@@ -52,6 +68,11 @@ def consultarInternacoes():
     return dados
 
 def registrarAlta(id_internacao, id_leito):
+    """
+    --- BLOCO 3: PROCESSO DE ALTA (UPDATE) ---
+    Registra a data de saída do paciente e libera o leito (status 'Livre') 
+    para a próxima utilização.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
@@ -62,7 +83,7 @@ def registrarAlta(id_internacao, id_leito):
             WHERE id = ?
         """, (data_saida, id_internacao))
         
-        # Atualiza status do leito para 'Livre'
+        # Liberação do recurso leito
         cursor.execute("UPDATE leito SET status = 'Livre' WHERE id = ?", (id_leito,))
         
         conexao.commit()

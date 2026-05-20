@@ -1,7 +1,17 @@
+# =================================================================
+# CONTROLLER: EnfermeiraController
+# Responsabilidade: Gerenciar o cadastro e a equipe de enfermagem.
+# =================================================================
+
 import sqlite3
 from Services.database import conectaBD
 
 def incluirEnfermeira(enfermeira):
+    """
+    --- BLOCO 1: REGISTRO DE PROFISSIONAL (CREATE) ---
+    Insere uma nova enfermeira no banco de dados.
+    O COREN (Conselho Regional de Enfermagem) atua como identificador profissional.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     enf_id = None
@@ -16,6 +26,10 @@ def incluirEnfermeira(enfermeira):
     return enf_id
 
 def consultarEnfermeiras():
+    """
+    --- BLOCO 2: LISTAGEM DA EQUIPE (READ) ---
+    Retorna a lista completa de profissionais de enfermagem cadastrados.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     dados = []
@@ -31,6 +45,10 @@ def consultarEnfermeiras():
     return dados
 
 def excluirEnfermeira(id_enf):
+    """
+    --- BLOCO 3: REMOÇÃO DE REGISTRO (DELETE) ---
+    Remove o registro da enfermeira do sistema.
+    """
     conexao = conectaBD()
     cursor = conexao.cursor()
     try:
